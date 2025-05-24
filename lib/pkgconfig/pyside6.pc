@@ -1,0 +1,14 @@
+prefix=/ucrt64
+exec_prefix=/ucrt64
+libdir=lib
+includedir=/ucrt64/include/PySide6
+typesystemdir=/ucrt64/share/PySide6/typesystems
+gluedir=/ucrt64/share/PySide6/glue
+pythonpath=/ucrt64/lib/python3.12/site-packages
+
+Name: PySide6
+Description: Support library for Python bindings of Qt5-based libraries.
+Version: 6.9.0
+Libs: -L${libdir} -lpyside6.cp312-mingw_x86_64_ucrt_gnu
+Cflags: -I${includedir}
+Requires: shiboken6

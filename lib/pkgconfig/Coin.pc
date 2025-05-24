@@ -1,0 +1,26 @@
+prefix=/ucrt64
+exec_prefix=${prefix}
+bindir=/ucrt64/bin
+libdir=/ucrt64/lib
+includedir=/ucrt64/include
+datarootdir=/ucrt64/share
+datadir=/ucrt64/share
+docdir=/ucrt64/share/doc/Coin
+infodir=/ucrt64/share/info
+mandir=/ucrt64/share/man
+htmldir=${docdir}/html
+
+Name: Coin
+Description: A high-level 3D graphics toolkit, fully compatible with SGI Open Inventor 2.1
+Version: 4.0.3
+Requires:
+Conflicts:
+Libs: -L${libdir} -lCoin  
+Cflags: -I${includedir} -DCOIN_DLL 
+
+have_3ds_import=1
+have_vrml97=1
+have_sound=1
+have_superglu=0
+have_threads=1
+have_threadsafe=1

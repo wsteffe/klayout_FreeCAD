@@ -1,0 +1,5 @@
+if (NOT PYTHON_CONFIG_SUFFIX)
+    message(STATUS "PySide6Config: Using default python: .cp312-mingw_x86_64_ucrt_gnu")
+    SET(PYTHON_CONFIG_SUFFIX .cp312-mingw_x86_64_ucrt_gnu)
+endif()
+include(${CMAKE_CURRENT_LIST_DIR}/PySide6Config${PYTHON_CONFIG_SUFFIX}.cmake)
