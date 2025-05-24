@@ -34,20 +34,88 @@ if [ "$ucrt_vssdk" = "" ]; then
 fi
   ucrt_vssdk=$(cygpath -w "$ucrt_vssdk")
 
+packages="mingw-w64-ucrt-x86_64-freecad \
+	  mingw-w64-ucrt-x86_64-coin \
+	  mingw-w64-ucrt-x86_64-fmt \
+	  mingw-w64-ucrt-x86_64-freetype \
+	  mingw-w64-ucrt-x86_64-med \
+	  mingw-w64-ucrt-x86_64-opencascade \
+	  mingw-w64-ucrt-x86_64-openscad \
+	  mingw-w64-ucrt-x86_64-pyside6 \
+	  mingw-w64-ucrt-x86_64-vtk \
+          mingw-w64-ucrt-x86_64-xerces-c \
+          mingw-w64-ucrt-x86_64-yaml-cpp \
+	  mingw-w64-ucrt-x86_64-zlib"
 
+if [ -d "bin" ]; then
+  rm -rf bin
+fi
 mkdir bin
-cp /ucrt64/bin/FreeCAD.pyd  bin
-cp /ucrt64/bin/FreeCADCmd.exe bin
-cp /ucrt64/bin/FreeCADGui.pyd bin
+if [ -d "lib" ]; then
+  rm -rf lib
+fi
+mkdir lib
+if [ -d "share" ]; then
+  rm -rf share
+fi
+mkdir share
+
+for pckg in $packages; do
+  binfiles=$(pacman -Ql $pckg | grep /bin/ | sed -e "s/$pckg//")
+  for p in $binfiles; do
+    dp=${p:8}
+    if [ ${dp:0:4}!="bin/" ]; then
+      if [ -d $p ] && [ ! -d $dp ]; then
+       mkdir $dp
+      elif  [ ! -d $p ] && [ -e $p ]; then
+        cp $p $dp
+      fi
+    fi
+  done
+  libfiles=$(pacman -Ql $pckg | grep /lib/ | sed -e "s/$pckg//")
+  for p in $libfiles; do
+    dp=${p:8}
+    if [ ${dp:0:4}!="lib/" ]; then
+      if [ -d $p ] && [ ! -d $dp ]; then
+       mkdir $dp
+      elif [ ! -d $p ] && [ -e $p ] &&  [ "${p: -2}" != ".a" ]; then
+        cp $p $dp
+      fi
+    fi
+  done
+  sharefiles=$(pacman -Ql $pckg | grep /share/ | sed -e "s/$pckg//")
+  for p in $sharefiles; do
+    dp=${p:8}
+    if [ ${dp:0:4}!="share/" ]; then
+      if [ -d $p ] && [ ! -d $dp ]; then
+       mkdir $dp
+      elif [ ! -d $p ] && [ -e $p ]; then
+        cp $p $dp
+      fi
+    fi
+  done
+done
+
+if [ -d "Ext" ]; then
+  rm -rf Ext
+fi
 cp -r /ucrt64/Ext ./
+if [ -d "Ext" ]; then
+  rm -rf Mod
+fi
 cp -r /ucrt64/Mod ./
 
 # ----------------------------------------------------------
 # Binary dependencies
 
+#exit 0 #Skips adding binary dependencies
+
 pushd bin
 
 new_libs=$(find . -name "*.exe" -or -name "*.dll" -or -name "*.pyd" -or -name "*.so")
+new_libs+="  "
+new_libs+=$(find ./../lib -name "*.pyd")
+
 
 while [ "$new_libs" != "" ]; do
 
@@ -55,7 +123,9 @@ while [ "$new_libs" != "" ]; do
 
   # Analyze the dependencies of our components and add the corresponding libraries from $mingw_inst/bin
   tmp_libs=.tmp-libs.txt
-  rm -f $tmp_libs
+  if [ -e $tmp_libs ]; then
+    rm -f $tmp_libs
+  fi
   echo "" >$tmp_libs
   for l in $new_libs; do
     echo -n "."
@@ -63,6 +133,7 @@ while [ "$new_libs" != "" ]; do
   done
   echo ""
   libs=$(cat $tmp_libs | sort -u)
+  echo $libs
   rm -f $tmp_libs
   new_libs=""
 
